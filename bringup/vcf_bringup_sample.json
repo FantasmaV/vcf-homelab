@@ -1,0 +1,176 @@
+{
+  "sddcId": "vcf-mgmt-sddc",
+  "vcfInstanceName": "VCF-LAB-01",
+  "workflowType": "VCF",
+  "version": "9.0.2",
+  "skipEsxThumbprintValidation": true,
+  "skipGatewayPingValidation": true,
+
+  "_comment_skipFlags": "skipEsxThumbprintValidation and skipGatewayPingValidation are acceptable in lab environments. Set both to false in production.",
+
+  "dnsSpec": {
+    "subdomain": "lab.local",
+    "nameservers": [
+      "192.0.2.3"
+    ]
+  },
+  "ntpServers": [
+    "192.0.2.14"
+  ],
+
+  "sddcManagerSpec": {
+    "hostname": "sddcmgr.lab.local",
+    "rootPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "sshPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "localUserPassword": "REPLACE_WITH_STRONG_PASSWORD"
+  },
+
+  "vcenterSpec": {
+    "vcenterHostname": "vcenter.lab.local",
+    "rootVcenterPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "vmSize": "tiny",
+    "_comment_vmSize": "Use 'tiny' for lab/homelab deployments. Use 'small' or larger for production.",
+    "ssoDomain": "vsphere.local"
+  },
+
+  "hostSpecs": [
+    {
+      "hostname": "esx01.lab.local",
+      "credentials": {
+        "username": "root",
+        "password": "REPLACE_WITH_HOST_PASSWORD"
+      }
+    },
+    {
+      "hostname": "esx02.lab.local",
+      "credentials": {
+        "username": "root",
+        "password": "REPLACE_WITH_HOST_PASSWORD"
+      }
+    },
+    {
+      "hostname": "esx03.lab.local",
+      "credentials": {
+        "username": "root",
+        "password": "REPLACE_WITH_HOST_PASSWORD"
+      }
+    },
+    {
+      "hostname": "esx04.lab.local",
+      "credentials": {
+        "username": "root",
+        "password": "REPLACE_WITH_HOST_PASSWORD"
+      }
+    }
+  ],
+
+  "nsxtSpec": {
+    "nsxtManagers": [
+      {
+        "hostname": "nsx-mgr01.lab.local"
+      }
+    ],
+    "vipFqdn": "nsx-mgmt-vip.lab.local",
+    "rootNsxtManagerPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "nsxtAdminPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "nsxtAuditPassword": "REPLACE_WITH_STRONG_PASSWORD",
+    "transportVlanId": 10,
+    "_comment_transportVlanId": "Transport VLAN used for TEP (Tunnel Endpoint) traffic. Must match your physical switch VLAN config."
+  },
+
+  "networkSpecs": [
+    {
+      "networkType": "MANAGEMENT",
+      "vlanId": 10,
+      "mtu": 1700,
+      "_comment_mtu": "MTU set to 1700 to accommodate lab switch limitations. Recommend 9000 (jumbo frames) in production for vSAN and vMotion.",
+      "gateway": "192.0.2.1",
+      "subnet": "192.0.2.0/24",
+      "teamingPolicy": "loadbalance_loadbased",
+      "activeUplinks": [
+        "uplink1"
+      ],
+      "_comment_uplinks": "Single uplink used in this lab (MS-01 homelab nodes). Production deployments should use at minimum uplink1 + uplink2.",
+      "includeIpAddressRanges": [
+        {
+          "startIpAddress": "192.0.2.36",
+          "endIpAddress": "192.0.2.39"
+        }
+      ]
+    },
+    {
+      "networkType": "VMOTION",
+      "vlanId": 20,
+      "mtu": 1700,
+      "gateway": "192.0.2.1",
+      "subnet": "192.0.2.0/24",
+      "teamingPolicy": "loadbalance_loadbased",
+      "activeUplinks": [
+        "uplink1"
+      ],
+      "includeIpAddressRanges": [
+        {
+          "startIpAddress": "192.0.2.21",
+          "endIpAddress": "192.0.2.24"
+        }
+      ]
+    },
+    {
+      "networkType": "VSAN",
+      "vlanId": 30,
+      "mtu": 1700,
+      "gateway": "192.0.2.1",
+      "subnet": "192.0.2.0/24",
+      "teamingPolicy": "loadbalance_loadbased",
+      "activeUplinks": [
+        "uplink1"
+      ],
+      "includeIpAddressRanges": [
+        {
+          "startIpAddress": "192.0.2.21",
+          "endIpAddress": "192.0.2.24"
+        }
+      ]
+    },
+    {
+      "networkType": "VM_MANAGEMENT",
+      "vlanId": 10,
+      "mtu": 1700,
+      "gateway": "192.0.2.1",
+      "subnet": "192.0.2.0/24",
+      "teamingPolicy": "loadbalance_loadbased",
+      "activeUplinks": [
+        "uplink1"
+      ]
+    }
+  ],
+
+  "dvsSpecs": [
+    {
+      "dvsName": "vcf-mgt-vds",
+      "mtu": 1700,
+      "networks": [
+        "MANAGEMENT",
+        "VMOTION",
+        "VSAN",
+        "VM_MANAGEMENT"
+      ],
+      "vmnicsToUplinks": [
+        {
+          "id": "vmnic0",
+          "uplink": "uplink1"
+        }
+      ]
+    }
+  ],
+
+  "datastoreSpec": {
+    "vsanSpec": {
+      "datastoreName": "vcf-mgmt-esa-vsan",
+      "esaConfig": {
+        "enabled": false,
+        "_comment_esaConfig": "ESA (Express Storage Architecture) disabled for OSA (Original Storage Architecture) compatibility. Enable ESA for NVMe-only all-flash configurations in VCF 9.x."
+      }
+    }
+  }
+}
